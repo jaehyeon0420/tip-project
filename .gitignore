@@ -1,0 +1,14 @@
+pipeline-job.yaml
+job.yaml
+.amlignore
+.env
+conda.yaml
+ml-2.41.1-py3-none-any.whl
+pytest.ini
+schedule.txt
+schedule.yaml
+setup_azure_resources.sh
+절차.txt
+.cursor/rules/tip-project-architecture.mdc
+*.pyc
+README.md

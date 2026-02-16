@@ -1,0 +1,66 @@
+db:
+  similar_trademark_threshold: 0.7 # DB 최소 유사도 임계값 (70% 이상 유사도)
+
+# Risk Classification
+risk:
+  threshold_weight: 0.8           # 가중치 임계값
+  threshold_score: 0.8            # 점수 임계값
+  total_score_threshold: 70.0     # 종합 점수 임계값
+  reason_trademark_threshold: 5   # 거절 사유 조회 개수
+  anchors:
+    visual:                       # 시각 유사도 범위
+      - [-1.0, 0.0]              
+      - [0.3, 0.2]  
+      - [0.7, 0.8]  
+      - [1.0, 1.0]   
+    phonetic:                    # 발음 유사도 범위
+      - [0.0, 0.0]
+      - [50.0, 0.5] 
+      - [70.0, 0.8] 
+      - [100.0, 1.0]
+    conceptual:                  # 관념 유사도 범위
+      - [-1.0, 0.0]
+      - [0.6, 0.2]
+      - [0.85, 0.8]
+      - [1.0, 1.0]
+    
+  grade_weight: {               # 가중치 매핑 테이블
+      5: 1.0,
+      4: 0.8,
+      3: 0.5,
+      2: 0.2,
+      1: 0.05
+  }
+  default_weight: 0.5             # 기본 가중치
+  risk_threshold: {               # 위험도 임계값
+    "H": 0.85,
+    "M": 0.70,
+    "L": 0.55
+  }
+
+
+precedent:                      
+  max_rewrite_count : 3          # 판례 정보 조회 질문 쿼리 재생성 최대 횟수
+  max_web_search_count: 3        # 웹 검색 최대 횟수
+  top_k: 50                      # 판례 정보 조회 결과 최대 개수
+  legal_ratio : 0.4              # 법리 비율
+
+# Retry Limits
+retry:
+  max_regeneration_report_count : 3 # 보고서 생성 재생성 최대 횟수
+  max_rewrite_query_count: 3        # 판례 정보 조회 질문 쿼리 재생성 최대 횟수
+  report_evaluation_threshold: 70   # 보고서 평가 점수 임계값
+
+web_search:
+  display : 10                      # 웹 검색 결과 최대 개수
+
+# Model Parameters
+models:
+  gpt4o:
+    temperature: 0.0
+  gpt4o_mini:
+    temperature: 0.7
+  qwen_reporter:
+    temperature: 0.1
+    max_tokens: 3000
+    top_p: 0.9
