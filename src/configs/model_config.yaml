@@ -5,7 +5,6 @@ db:
 risk:
   threshold_weight: 0.8           # 가중치 임계값
   threshold_score: 0.8            # 점수 임계값
-  total_score_threshold: 70.0     # 종합 점수 임계값
   reason_trademark_threshold: 5   # 거절 사유 조회 개수
   anchors:
     visual:                       # 시각 유사도 범위

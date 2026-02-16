@@ -113,7 +113,16 @@ def apply_korean_phonetics(text_list):
         # None을 반환하지 않도록 주의
         # return text_list if text_list else [""]
         
-        g2p = G2p()
+        try:
+            from g2pk import G2p
+            g2p = G2p()
+        except ImportError:
+            logger.warning("g2pk 모듈을 찾을 수 없어 발음 변환을 건너뜁니다.")
+            return text_list if text_list else [""]
+        except Exception as e:
+            logger.warning(f"g2pk 초기화 중 오류 발생: {e}")
+            return text_list if text_list else [""]
+
         result = []
         for text in text_list:
             if text and re.match(r'^[가-힣]+$', text):

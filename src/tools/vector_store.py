@@ -104,7 +104,7 @@ class VectorStore:
                     where_clause = " AND ".join(class_code_where)
                     
                     # 현재 보호 상표에 대해 이미 침해 위험군 테이블에 등록된 수집 상표는 제외
-                    where_clause += f" AND not exists (select 1 from tbl_infringe_risk c where c.c_trademark_reg_no = a.c_trademark_reg_no and c.p_trademark_reg_no = ${param_idx})"
+                    where_clause += f" AND not exists (select 1 from tbl_infringe_risk c where c.p_trademark_reg_no = ${param_idx} and c.c_product_name = a.c_product_name and c.c_product_page_url = a.c_product_page_url and c.c_trademark_name = a.c_trademark_name and c.c_trademark_name = a.c_trademark_name and c.c_manufacturer_info = a.c_manufacturer_info and c.c_brand_info = a.c_brand_info)"
                     params.append(p_row["p_trademark_reg_no"])
                     param_idx += 1
 
@@ -195,12 +195,11 @@ class VectorStore:
                     total_score, 
                     risk_level,
                     judge_date,
-                    c_trademark_reg_no,
                     p_trademark_reg_no
                 ) VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
                     $12, $13, $14, $15, $16, $17, $18, $19, $20,
-                    NOW(),$21,$22
+                    NOW(),$21
                 )
             """
             
@@ -227,7 +226,6 @@ class VectorStore:
                 ensemble_result.conceptual_weight,
                 ensemble_result.total_score, 
                 ensemble_result.risk_level,
-                c_tm.c_trademark_reg_no,
                 p_trademark_reg_no
             ]
             

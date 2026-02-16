@@ -81,7 +81,7 @@ async def ensemble_model(state: GraphState) -> Dict[str, Any]:
         )
         
         # 위험도가 일정 수준 이상이면 침해 발견 플래그 설정
-        is_infringement = ensemble_result.risk_level in ["H", "M"]
+        is_infringement = ensemble_result.risk_level in ["H", "M", "L"]
         
         logger.info(f"[앙상블 모델] 평가 완료: 위험등급={ensemble_result.risk_level}, 총점={ensemble_result.total_score:.2f}, 침해여부={is_infringement}")
         

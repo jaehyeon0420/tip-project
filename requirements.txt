@@ -19,4 +19,5 @@ jamo>=0.4.1
 rapidfuzz>=3.0.0
 python-mecab-ko>=1.0.0
 g2pk>=0.9.4
+nltk>=3.6.0
 scikit-learn>=1.0.0

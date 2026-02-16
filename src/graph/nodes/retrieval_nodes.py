@@ -31,10 +31,8 @@ async def save_infringe_risk_node(state: GraphState) -> Dict[str, Any]:
         
         logger.info(f"[위험군 저장] 조건 확인: 총점={total_score}, 위험도={risk_level}")
         
-        total_score_threshold = model_config.get('risk').get("total_score_threshold")
-        
         # 결과 재검증
-        if total_score >= total_score_threshold and risk_level in ["H", "M", "L"]:
+        if risk_level in ["H", "M", "L"]:
             # 수집 상표 정보, 앙상블 모델 결과, 보호 상표 번호
             risk_data = {
                 "c_tm": state["current_collected_trademark"],
