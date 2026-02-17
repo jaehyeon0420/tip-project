@@ -63,7 +63,7 @@ async def retrieve_precedents(search_querys: List[str], scores: Dict[str, float]
         for query in search_querys:
             # 쿼리 임베딩
             # (주의: embed_query는 동기 함수이므로 블로킹 가능성 있음. 향후 aembed_query로 교체 권장)
-            q_vec = embedding_model.embed_query(query)
+            q_vec = await embedding_model.aembed_query(query)
             
             # 판례 검색 (단수형 메서드 호출로 수정)
             search_precedents = await vector_store.search_precedent(q_vec, target_hml, l_limit, f_limit)

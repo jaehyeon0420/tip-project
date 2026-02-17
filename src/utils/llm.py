@@ -73,7 +73,7 @@ def get_image_url_from_bytea(image_data):
                 except Exception:
                     image_bytes = image_data.encode('latin-1', errors='ignore')
     except Exception as e:
-        print(f"변환 오류: {e}")
+        logger.error(f"변환 오류: {e}")
         return ""
 
     if not image_bytes:

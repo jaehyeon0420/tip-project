@@ -42,7 +42,7 @@ async def evaluate_report_node(state: GraphState) -> Dict[str, Any]:
         result = evaluate_report(context, report_content)
                       
         logger.info(f"[보고서 평가] 결과: {result.decision} (점수: {result.score})")
-        logger.info(f"   📋 피드백: {result.feedback}")
+        logger.info(f"피드백: {result.feedback}")
         
         # 재생성 시도 카운트 증가
         if result.decision == "regenerate":

@@ -44,7 +44,7 @@ def generate_report(context: dict) -> str:
     return report_content
 
 
-def evaluate_report(context: dict, report_content: str) -> str:
+def evaluate_report(context: dict, report_content: str) -> EvaluationResult:
     base_context = render_user_prompt("precedent_grading", **context)
         
     # 평가용 프롬프트 렌더링

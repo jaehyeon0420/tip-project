@@ -208,7 +208,7 @@ async def _search_reason_trademark(queries: List[str]) -> List[str]:
     for query in queries:
         try:
             # 쿼리 임베딩
-            query_vec = text_embedding_model.embed_query(query)
+            query_vec = await text_embedding_model.aembed_query(query)
             reason_trademark_threshold = model_config.get("risk").get("reason_trademark_threshold")
             
             # 거절 사유 조회

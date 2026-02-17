@@ -120,6 +120,7 @@ class VectorStore:
                                c_trademark_type, 
                                c_trademark_class_code,                        
                                c_trademark_name, 
+                               c_trademark_name_vec,
                                c_trademark_image,
                                c_trademark_image_vec,
                                c_trademark_ent_date
@@ -144,6 +145,7 @@ class VectorStore:
                             "c_trademark_type"              : c_row["c_trademark_type"] or "",
                             "c_trademark_class_code"        : c_row["c_trademark_class_code"] or "",
                             "c_trademark_name"              : c_row["c_trademark_name"] or "",
+                            "c_trademark_name_vec"          : json.loads(c_row["c_trademark_name_vec"]),
                             "c_trademark_image"             : self._encode_image(c_row["c_trademark_image"]),
                             "c_trademark_image_vec"         : json.loads(c_row["c_trademark_image_vec"]),
                             "c_trademark_ent_date"          : c_row["c_trademark_ent_date"],
@@ -174,59 +176,28 @@ class VectorStore:
 
             query = """
                 INSERT INTO tbl_infringe_risk (
-                    c_product_name, 
-                    c_product_page_url, 
-                    c_manufacturer_info, 
-                    c_brand_info,
-                    c_l_category, 
-                    c_m_category, 
-                    c_s_category,
-                    c_trademark_type, 
-                    c_trademark_class_code, 
-                    c_trademark_name, 
-                    c_trademark_image,
-                    c_trademark_ent_date,
-                    visual_score, 
-                    visual_weight,
-                    phonetic_score, 
-                    phonetic_weight,
-                    conceptual_score, 
-                    conceptual_weight,
-                    total_score, 
-                    risk_level,
-                    judge_date,
-                    p_trademark_reg_no
+                    c_product_name, c_product_page_url, c_manufacturer_info, c_brand_info, c_l_category, 
+                    c_m_category, c_s_category, c_trademark_type, c_trademark_class_code, c_trademark_name, 
+                    c_trademark_name_vec, c_trademark_image, c_trademark_image_vec, c_trademark_ent_date, visual_score, 
+                    visual_weight, phonetic_score, phonetic_weight, conceptual_score, conceptual_weight,
+                    total_score, risk_level, judge_date,p_trademark_reg_no
                 ) VALUES (
-                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
-                    $12, $13, $14, $15, $16, $17, $18, $19, $20,
-                    NOW(),$21
+                    $1, $2, $3, $4, $5, 
+                    $6, $7, $8, $9, $10, 
+                    $11, $12, $13, $14, $15, 
+                    $16, $17, $18, $19, $20,
+                    $21, $22, NOW(), $23
                 )
             """
             
             c_image_bytes = self._decode_image(c_tm.c_trademark_image)
             
             params = [
-                c_tm.c_product_name,                    
-                c_tm.c_product_page_url, 
-                c_tm.c_manufacturer_info, 
-                c_tm.c_brand_info,
-                c_tm.c_l_category, 
-                c_tm.c_m_category, 
-                c_tm.c_s_category,
-                c_tm.c_trademark_type,   
-                c_tm.c_trademark_class_code, 
-                c_tm.c_trademark_name, 
-                c_image_bytes,
-                c_tm.c_trademark_ent_date,
-                ensemble_result.visual_score, 
-                ensemble_result.visual_weight,
-                ensemble_result.phonetic_score, 
-                ensemble_result.phonetic_weight,
-                ensemble_result.conceptual_score, 
-                ensemble_result.conceptual_weight,
-                ensemble_result.total_score, 
-                ensemble_result.risk_level,
-                p_trademark_reg_no
+                c_tm.c_product_name, c_tm.c_product_page_url, c_tm.c_manufacturer_info, c_tm.c_brand_info, c_tm.c_l_category, 
+                c_tm.c_m_category, c_tm.c_s_category, c_tm.c_trademark_type, c_tm.c_trademark_class_code, c_tm.c_trademark_name, 
+                c_tm.c_trademark_name_vec, c_image_bytes, c_tm.c_trademark_image_vec, c_tm.c_trademark_ent_date, ensemble_result.visual_score, 
+                ensemble_result.visual_weight, ensemble_result.phonetic_score, ensemble_result.phonetic_weight, ensemble_result.conceptual_score, ensemble_result.conceptual_weight,
+                ensemble_result.total_score, ensemble_result.risk_level,p_trademark_reg_no
             ]
             
             async with pool.acquire() as conn:

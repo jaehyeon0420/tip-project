@@ -26,6 +26,7 @@ class CollectedTrademarkInfo(BaseModel):
     c_trademark_type : str
     c_trademark_class_code : str
     c_trademark_name : str
+    c_trademark_name_vec : list[float]
     c_trademark_image : str
     c_trademark_image_vec : list[float]
     c_trademark_ent_date : datetime
@@ -44,6 +45,7 @@ class InfringementRisk(BaseModel):
     visual_description: str
 
 class ReasonTrademark(BaseModel):
+    """거절 사유 정보"""
     patent_id:str
     similarity_score:float
     cleaned_content:str
