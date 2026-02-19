@@ -86,13 +86,14 @@ def _build_email_body(approved_reports: list[ApprovedReport], p_trademark_name: 
         <html>
         <body>
             <h2>[TIP] 상표권 침해 분석 보고서</h2>
+            <p style="color: red;">※ 본 콘텐츠는 AI에 의해 생성되었으며, 정보의 정확성이나 완전성을 100% 보장하지 않습니다. 중요한 결정 시에는 반드시 사실 관계를 별도로 확인하시기 바랍니다.</p>
+            <br>
             <p>안녕하세요.</p>
             <p>보호 상표 <strong>[{p_trademark_name}]</strong>에 대한 
             침해 의심 상표 <strong>{len(approved_reports)}건</strong>의 분석이 완료되었습니다.</p>
             {protection_image_tag}
             <hr/>
             {reports_html}
-            <p>본 메일은 발신 전용입니다.</p>
         </body>
         </html>
         """

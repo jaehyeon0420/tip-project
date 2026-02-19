@@ -40,6 +40,7 @@ def extract_common_context(state: GraphState) -> Dict[str, Any]:
         conceptual_weight = f"{ensemble.conceptual_weight:.2f}" if ensemble else "0.00"
         total_score = f"{ensemble.total_score:.1f}" if ensemble else "0.0"
         risk_level = ensemble.risk_level if ensemble else "N/A"
+        risk_level_ko = ensemble.risk_level_ko if ensemble else "N/A"
 
         return {
             # 상표 기본 정보
@@ -56,6 +57,7 @@ def extract_common_context(state: GraphState) -> Dict[str, Any]:
             "conceptual_weight": conceptual_weight,
             "total_score": total_score,
             "risk_level": risk_level,
+            "risk_level_ko" : risk_level_ko,
         }
     except Exception as e:
         logger.error(f"공통 컨텍스트 추출 중 오류: {e}")
@@ -103,16 +105,9 @@ def clean_hangul(text_list):
 
 def apply_korean_phonetics(text_list):
     """
-    한국어 발음 변환 로직 (현재는 g2pk 미사용이므로 원본 반환)
+    한국어 발음 변환 로직
     """
-    try:
-        # if not isinstance(text_list, list):
-        #     text_list = [text_list]
-        
-        # 현재 g2pk 라이브러리가 주석 처리되어 있으므로, 입력값을 그대로 반환하되
-        # None을 반환하지 않도록 주의
-        # return text_list if text_list else [""]
-        
+    try:        
         try:
             from g2pk import G2p
             g2p = G2p()

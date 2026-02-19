@@ -16,10 +16,9 @@ def calculate_phonetic_similarity(p_trademark_name: str, c_trademark_name: str) 
     try:
         # 상표명 한글 음역 표준화 작업
         logger.info(f"[호칭 유사도] 음역 표준화 요청: {p_trademark_name}, {c_trademark_name}")
-        pair = _convert_pair(p_trademark_name, c_trademark_name)
+        list_a = _convert_pair(p_trademark_name)
+        list_b = _convert_pair(c_trademark_name)
         
-        list_a = pair['korean_a'] 
-        list_b = pair['korean_b']
         logger.info(f"[호칭 유사도] 음역 결과: A={list_a}, B={list_b}")
 
         # 각 발음 리스트에서 가장 긴 발음의 80% 이상 길이만 유효한 비교 대상으로 삼음 (지에스 vs 지에스이시보 방지)
@@ -52,14 +51,14 @@ def calculate_phonetic_similarity(p_trademark_name: str, c_trademark_name: str) 
         return 0.0
 
             
-def _convert_pair(p_trademark_name, c_trademark_name):   
+def _convert_pair(trademark_name):   
     try:
-        p_trademark_name, c_trademark_name = p_trademark_name.strip(), c_trademark_name.strip()
+        trademark_name = trademark_name.strip()
                 
         model = Container.get_gpt51_chat()
         
         response = generate_text(model, get_system_prompt("phonetic_similarity"), 
-                                        f"Brand A: {p_trademark_name}, Brand B: {c_trademark_name}", 
+                                        f"Brand : {trademark_name}", 
                                         "")
         
         parsed = None
@@ -74,33 +73,21 @@ def _convert_pair(p_trademark_name, c_trademark_name):
                 try:
                     json_str_fixed = json_str.replace('\\"', '"').replace("'", '"')
                     parsed = json.loads(json_str_fixed)
-                except json.JSONDecodeError:
-                    try:
-                        korean_a_match = re.search(r'"korean_a"\s*:\s*\[([^\]]+)\]', json_str)
-                        korean_b_match = re.search(r'"korean_b"\s*:\s*\[([^\]]+)\]', json_str)
-                        if korean_a_match and korean_b_match:
-                            k_a_raw = korean_a_match.group(1)
-                            k_b_raw = korean_b_match.group(1)
-                            k_a_list = re.findall(r'"([^"]+)"', k_a_raw)
-                            k_b_list = re.findall(r'"([^"]+)"', k_b_raw)
-                            parsed = {"korean_a": k_a_list, "korean_b": k_b_list}
-                    except:
-                        pass
+                except :
+                    pass
         
         if parsed:
-            k_a = clean_hangul(parsed.get("korean_a", []))
-            k_b = clean_hangul(parsed.get("korean_b", []))
-            return {"korean_a": apply_korean_phonetics(k_a), 
-                    "korean_b": apply_korean_phonetics(k_b)}
-        else:
-            logger.warning(f"[호칭 유사도] JSON 파싱 실패 (원본 사용): {response[:50]}...")
-                    
-        return {"korean_a": apply_korean_phonetics([p_trademark_name]), "korean_b": apply_korean_phonetics([c_trademark_name])}       
-
+            for key in parsed:
+                if isinstance(parsed[key], list):
+                    k_list = clean_hangul(parsed[key])
+                    return apply_korean_phonetics(k_list)
+        
+        logger.warning(f"[호칭 유사도] JSON 파싱 실패 (원본 사용): {response[:50]}...")
+              
     except Exception as e:
         logger.error(f"[호칭 유사도] 음역 변환 중 오류: {e}")
-        return {"korean_a": [p_trademark_name], "korean_b": [c_trademark_name]}
 
+    return apply_korean_phonetics([trademark_name])
 
 def _calculate_similarity(pron_a, pron_b):
     """ 3-Tier Decision Logic 기반 최종 유사도 산출"""

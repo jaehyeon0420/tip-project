@@ -144,10 +144,34 @@ async def calculate_risk(protection_trademark: ProtectionTrademarkInfo,
             logger.info("[앙상블] 전체 관찰(Overall Observation Rule) 적용")
             
             final_score = _calculate_weighted_rms(score_dict, dynamic_weights)
+            
+            # 관념 점수가 높고, 외관/호칭 점수가 낮은 경우 관념 점수만 20% 감점
+            is_semantic_high = (score_dict["semantic"] >= 0.8 and score_dict["semantic"] >= final_score)
+            
+            valid_others = [cal_vis, cal_pho]
+            
+            # 외관/호칭 점수가 낮은 경우
+            if valid_others and all(s < 0.3 for s in valid_others):
+                is_others_low = True
+            else:
+                is_others_low = False
+
+            # 관념 점수가 높고, 외관/호칭 점수가 낮은 경우 관념 점수만 20% 감점
+            if is_semantic_high and is_others_low:
+                score_dict["semantic"] *= 0.8 
+                
+                final_score = _calculate_weighted_rms(score_dict, dynamic_weights)
         
         final_score = round(final_score, 4)
         risk_level = _determine_risk_level(final_score)
 
+        risk_level_ko_dict = {
+            "H": "고위험",
+            "M": "중위험",
+            "L": "저위험"
+        }
+        risk_level_ko = risk_level_ko_dict.get(risk_level, "")
+        
         return InfringementRisk(
             visual_score=cal_vis,
             visual_weight=dynamic_weights["visual"],
@@ -157,6 +181,7 @@ async def calculate_risk(protection_trademark: ProtectionTrademarkInfo,
             conceptual_weight=dynamic_weights["semantic"],
             total_score=final_score,
             risk_level=risk_level,
+            risk_level_ko=risk_level_ko,
             visual_description=visual_description
         )
 
@@ -322,8 +347,9 @@ def _calculate_weighted_rms(scores: Dict[str, float], weights: Dict[str, float])
             s = scores.get(key, 0.0)
             w = weights.get(key, 0.0)
             
-            numerator += w * (s ** 2)
-            denominator += w
+            if s > 0.001:  # 0.001 미만은 0으로 간주
+                numerator += w * (s ** 2)
+                denominator += w
             
         if denominator == 0:
             return 0.0

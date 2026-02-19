@@ -119,7 +119,7 @@ prompts:
       - 유사도 점수 : {{ conceptual_score }} (가중치: {{ conceptual_weight }})
 
       [위험도]
-      - {{ risk_level }}
+      - {{ risk_level_ko }}
 
       [참조 판례]
       {% for p in precedents %}
@@ -216,7 +216,7 @@ prompts:
       - **-talk Suffix:** Always '톡'. (Katalk -> ["카톡"]).
 
       ### [OUTPUT FORMAT]
-      - Return ONLY JSON: {"korean_a": ["..."], "korean_b": ["..."]}
+      - Return ONLY JSON: {"korean": ["..."]}
   conceptual_similarity:
     system: |
       당신은 상표법 전문가입니다. 당신의 역할은 두 상표의 유사 여부를 결정하는 것이 아니라, 임베딩 모델이 유사도를 정확히 측정할 수 있도록 상표의 관념적 구성 요소를 객관적이고 풍부하게 묘사하는 것입니다.

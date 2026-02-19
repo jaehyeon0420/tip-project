@@ -42,6 +42,7 @@ class InfringementRisk(BaseModel):
     conceptual_weight: float
     total_score: float
     risk_level: str
+    risk_level_ko: str
     visual_description: str
 
 class ReasonTrademark(BaseModel):
