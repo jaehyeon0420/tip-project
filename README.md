@@ -2,7 +2,9 @@
 
 > **Corrective RAG 기반 상표권 침해 자동 모니터링 시스템**
 
-![TIP Banner](assets/logo.png)
+<p align="center">
+  <img src="assets/logo.png" alt="TIP Logo" width="200" />
+</p>
 
 ## 프로젝트 개요
 
@@ -25,7 +27,6 @@
 
 ## 목차
 
-- [시스템 아키텍처](#시스템-아키텍처)
 - [LangGraph 워크플로우](#langgraph-워크플로우)
 - [핵심 기능 상세](#핵심-기능-상세)
 - [기술 스택](#기술-스택)
@@ -34,66 +35,6 @@
 - [인프라 및 배포](#인프라-및-배포)
 - [환경 설정](#환경-설정)
 - [실행 방법](#실행-방법)
-- [트러블슈팅](#트러블슈팅)
-
----
-
-## 시스템 아키텍처
-
-```mermaid
-flowchart TB
-    subgraph Azure["☁️ Azure Cloud"]
-        subgraph AzureML["Azure Machine Learning"]
-            Schedule["Cron Schedule<br/>매일 KST 10:00"]
-            Compute["Compute Cluster<br/>Standard_DS3_v2"]
-            vLLM["vLLM Serving<br/>Qwen-2.5-7B"]
-        end
-        AzureOpenAI["Azure OpenAI Service<br/>GPT-5.1-chat · GPT-4o<br/>text-embedding-3-large"]
-        PostgreSQL[(PostgreSQL<br/>+ pgvector)]
-    end
-
-    subgraph External["🌐 외부 서비스"]
-        LawAPI["법령정보센터<br/>Open API"]
-        SMTP["SMTP Server<br/>메일 발송"]
-    end
-
-    subgraph TIP["🔍 TIP Core Engine"]
-        Main["main.py<br/>배치 오케스트레이터"]
-        Graph["LangGraph<br/>StateGraph Workflow"]
-        Scoring["3-Track Scoring<br/>외관 · 호칭 · 관념"]
-        Ensemble["Ensemble Model<br/>동적 가중치 + 위험도 분류"]
-        RAG["Corrective RAG<br/>판례 검색 · 검증 · 보충"]
-        Report["Report Pipeline<br/>생성 · 평가 · 재생성"]
-        Mail["Mail Service<br/>HTML 보고서 발송"]
-    end
-
-    Schedule -->|"트리거"| Compute
-    Compute -->|"컨테이너 실행"| Main
-    Main --> Graph
-    Graph --> Scoring
-    Scoring --> Ensemble
-    Ensemble --> RAG
-    RAG --> Report
-    Report --> Mail
-
-    Scoring <-->|"이미지 캡셔닝 · 임베딩"| AzureOpenAI
-    Ensemble <-->|"식별력 평가"| AzureOpenAI
-    Ensemble <-->|"거절 사유 조회"| PostgreSQL
-    RAG <-->|"판례 벡터 검색"| PostgreSQL
-    RAG <-->|"쿼리 생성 · 판례 검증"| AzureOpenAI
-    RAG <-->|"외부 판례 검색"| LawAPI
-    Report <-->|"보고서 생성"| vLLM
-    Report <-->|"보고서 평가"| AzureOpenAI
-    Mail -->|"SMTP 발송"| SMTP
-    Main <-->|"상표 데이터 조회"| PostgreSQL
-```
-
-<!--
-📸 이미지 삽입 권장 위치 #3: 아키텍처 상세 다이어그램
-   - 위 Mermaid 도식을 Figma/Draw.io 등으로 더 정교하게 디자인한 이미지
-   - Azure 아이콘을 활용한 클라우드 아키텍처 다이어그램
-   - 예시: ![Architecture](docs/images/architecture.png)
--->
 
 ---
 
@@ -101,15 +42,19 @@ flowchart TB
 
 보호 상표와 수집 상표 1:1 쌍마다 아래 워크플로우가 실행됩니다.
 
+<p align="center">
+  <img src="assets/rag.PNG" alt="TIP workflow"/>
+</p>
+
 ```mermaid
 flowchart TD
-    START((START)) --> start["🚀 start<br/><sub>Fan-out 분기점</sub>"]
+    START((START)) --> start["🚀 start<br/><sub>병렬 실행</sub>"]
 
-    start --> visual["외관 유사도 분석<br/><sub>Model A · 코사인 유사도</sub>"]
-    start --> phonetic["호칭 유사도 분석<br/><sub>Model B · 자모 + JaroWinkler</sub>"]
-    start --> conceptual["관념 유사도 분석<br/><sub>Model C · 캡셔닝 + 임베딩</sub>"]
+    start --> visual["외관 유사도 분석"]
+    start --> phonetic["호칭 유사도 분석"]
+    start --> conceptual["관념 유사도 분석"]
 
-    visual --> ensemble["앙상블 모델<br/><sub>Model D · 동적 가중치</sub>"]
+    visual --> ensemble["결과 종합"]
     phonetic --> ensemble
     conceptual --> ensemble
 
@@ -119,15 +64,15 @@ flowchart TD
     save_risk --> generate_query["검색 쿼리 생성<br/><sub>GPT-4o</sub>"]
 
     generate_query --> retrieve["판례 벡터 검색<br/><sub>pgvector</sub>"]
-    retrieve --> grade["판례 검증<br/><sub>GPT-5.1-chat · Structured Output</sub>"]
+    retrieve --> grade["판례 검증<br/><sub>GPT-5.1</sub>"]
 
-    grade -->|"✅ approved"| gen_report["보고서 생성<br/><sub>Qwen-2.5-7B · vLLM</sub>"]
+    grade -->|"✅ approved"| gen_report["보고서 생성<br/><sub>Qwen-2.5</sub>"]
     grade -->|"🔄 rewrite"| generate_query
     grade -->|"🌐 web_search"| web_search["웹 검색<br/><sub>법령정보센터 API</sub>"]
 
     web_search --> grade
 
-    gen_report --> evaluate["보고서 평가<br/><sub>GPT-5.1-chat · Structured Output</sub>"]
+    gen_report --> evaluate["보고서 평가<br/><sub>GPT-5.1</sub>"]
 
     evaluate -->|"✅ approved<br/><sub>score ≥ 70</sub>"| END_OK((END))
     evaluate -->|"🔄 regenerate<br/><sub>보고서 재생성</sub>"| gen_report
